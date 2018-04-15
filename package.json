@@ -4,9 +4,12 @@
   "description": "node.js with koa2",
   "private": true,
   "dependencies": {
+    "axios": "^0.18.0",
+    "cheerio": "^1.0.0-rc.2",
     "koa": "^2.0.0",
     "koa-router": "^7.0.0",
-    "mysql": "2.13.0"
+    "mysql": "2.13.0",
+    "superagent": "^3.8.2"
   },
   "scripts": {
     "start": "node app.js"

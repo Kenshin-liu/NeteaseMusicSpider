@@ -1,46 +1,30 @@
-const Koa = require('koa');
-const app = new Koa();
-const { query } = require('./db');
+const cheerio = require('cheerio')
 
-// x-response-time
+const { query } = require('./db')
+const { get } = require('./util/http')
+const { list, initial, api, filter } = require('./config/singer')
 
-app.use(async (ctx, next) => {
-  const start = Date.now();
-  console.log('----------1')
-  await next();
-  const ms = Date.now() - start;
-  console.log('----------2')
-  ctx.set('X-Response-Time', `${ms}ms`);
-});
-
-async function selectAllData( ) {
-  let sql = 'SELECT * FROM song'
-  let dataList = await query( sql )
-  return dataList
+function collect() {
+  list.forEach(item => {
+    const { style, category, id } = item
+    initial.forEach(async index => {
+      try {
+        const response = await get(`http://music.163.com/discover/artist/cat`, { id: id, initial: index })
+        const $ = cheerio.load(response.data)
+        const elements = $('li .s-fc0')
+        Object.keys(elements).forEach(async el => {
+          if (filter.indexOf(el) > 0) return
+          const catId = $(elements[el]).attr('href') ? $(elements[el]).attr('href').replace(/[^0-9]/ig, "") : ''
+          const name = $(elements[el]).text()
+          if (!catId) return
+          let sql = 'insert into singer(name, style, initial, category, catId) values(?,?,?,?,?)'
+          let dataList = await query(sql, [name, style, index, category, catId])
+        })
+      } catch (e) {
+        console.log(e)
+      }
+    })
+  })
 }
 
-async function getData() {
-  let dataList = await selectAllData()
-  console.log( dataList )
-}
-
-getData()
-
-// logger
-
-app.use(async (ctx, next) => {
-  console.log('----------3')
-  const start = Date.now();
-  await next();
-  console.log('----------4')
-  const ms = Date.now() - start;
-  console.log(`${ctx.method} ${ctx.url} - ${ms}`);
-});
-
-// response
-
-app.use(async ctx => {
-  ctx.body = 'Hello World';
-});
-
-app.listen(3000);
+collect()
