@@ -1,0 +1,19 @@
+{
+  "name": "NeteaseMusicSpider",
+  "version": "1.0.0",
+  "description": "node.js with koa2",
+  "private": true,
+  "dependencies": {
+    "koa": "^2.0.0",
+    "koa-router": "^7.0.0",
+    "mysql": "2.13.0"
+  },
+  "scripts": {
+    "start": "node app.js"
+  },
+  "engines": {
+    "node": ">=6.0.0"
+  },
+  "author": "Fly",
+  "license": "CENTERM"
+}
