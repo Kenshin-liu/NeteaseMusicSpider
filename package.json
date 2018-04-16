@@ -12,7 +12,7 @@
     "superagent": "^3.8.2"
   },
   "scripts": {
-    "start": "node app.js"
+    "start": "node song.js"
   },
   "engines": {
     "node": ">=6.0.0"
