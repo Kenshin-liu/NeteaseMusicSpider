@@ -2,32 +2,33 @@ const { query } = require('./db')
 const { get } = require('./util/http')
 
 async function selectAllData() {
-  const sql = 'select * from singer'
+  const sql = 'select * from singer limit 300'
   const dataList = await query(sql)
-  return [{
-    id: 99,
-    name: 'Harlequin',
-    style: '韩国组合/乐队',
-    initial: 72,
-    category: '韩国',
-    catId: 126906
-  }]
+  return dataList
 }
 
 async function getData() {
   const datas = await selectAllData()
   datas.forEach(async singer => {
     const songs = await get('http://localhost:3000/artists', { id: singer.catId })
-    setData(songs.data.hotSongs, singer)
+    await setData(songs.data.hotSongs, singer)
   })
 }
 
-function setData(hotSongs, singer) {
-  const { id, name, style, category, catId } = singer
+async function setData(hotSongs, singer) {
   hotSongs.forEach(async song => {
-    const comments = await get('http://localhost:3000/comment/music', { id: song.id,limit: 1})
-    console.log(comments.data.total)
+    const comments = await get('http://localhost:3000/comment/music', { id: song.id, limit: 1 })
+    const total = comments.data.total
+    console.log(total)
+    if (total < 5000) return
+    await setMysql(total, song, singer).catch(error => console.log(error))
   })
+}
+
+async function setMysql(total, song, singer) {
+  const { id, name, style, category, catId } = singer
+  let sql = 'insert into song(singer, singerId, style, songId, name, comment) values(?,?,?,?,?,?)'
+  let result = await query(sql, [name, id, style, song.id, song.name, total])
 }
 
 getData().catch(error => console.log(error))
