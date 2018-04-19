@@ -13,6 +13,7 @@ axios.defaults.headers = {
 // }]
 // 带cookie请求
 axios.defaults.withCredentials = true
+axios.defaults.timeout = 5000
 
 //get请求
 function get(url, params) {
