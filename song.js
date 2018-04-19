@@ -8,20 +8,32 @@ async function selectAllData() {
 }
 
 async function getHotSongs() {
-  const datas = await selectAllData()
-  datas.forEach(async singer => {
-    const songs = await get('http://localhost:3000/artists', { id: singer.catId })
-    await getSong(songs.data.hotSongs, singer)
-  })
+  let errorId = ''
+  try {
+    const datas = await selectAllData()
+    for (let singer of datas) {
+      const songs = await get('http://localhost:3000/artists', { id: singer.catId })
+      errorId = singer.catId
+      await getSong(songs.data.hotSongs, singer)
+    }
+  } catch (e) {
+    console.log('error singerId:' + errorId)
+  }
 }
 
 async function getSong(hotSongs, singer) {
-  hotSongs.forEach(async song => {
-    const comments = await get('http://localhost:3000/comment/music', { id: song.id, limit: 1 })
-    const total = comments.data.total
-    if (total < 5000) return
-    await getComment(total, song, singer).catch(error => console.log(error))
-  })
+  let errorId = ''
+  try {
+    for (let song of hotSongs) {
+      errorId = song.id
+      const comments = await get('http://localhost:3000/comment/music', { id: song.id, limit: 1 })
+      const total = comments.data.total
+      if (total < 500) return
+      await getComment(total, song, singer).catch(error => console.log(error))
+    }
+  } catch (e) {
+    console.log('error singerId:' + errorId)
+  }
 }
 
 async function getComment(total, song, singer) {
