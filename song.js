@@ -28,7 +28,7 @@ async function getSong(hotSongs, singer) {
       errorId = song.id
       const comments = await get('http://localhost:3000/comment/music', { id: song.id, limit: 1 })
       const total = comments.data.total
-      if (total < 10000) return
+      if (total && total < 10000) return
       await getComment(total, song, singer).catch(error => console.log(error))
     } catch (e) {
       console.log('error songId:' + errorId)
